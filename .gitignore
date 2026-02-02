@@ -1,0 +1,17 @@
+/target/
+**/*.rs.bk
+.idea/
+.vscode/
+.trae/
+.cache/*
+*.swp
+*.swo
+.env
+.env.local
+.DS_Store
+Thumbs.db
+.cursorrules
+.cursor/
+requests.log
+verification_cache/
+*.log
