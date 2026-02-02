@@ -1,7 +1,7 @@
 [package]
 name = "rustools-mcp"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 description = "MCP implementation for querying Rust API documentation from docs.rs"
 authors = ["Zakaria Labib"]
 license = "MIT"
