@@ -2,7 +2,7 @@
 
 > **Supercharge your AI Editor with Rust Superpowers.** 🚀
 
-The `mcp_rustools` server connects your LLM (Trae, Cursor, Claude) directly to the Rust ecosystem (`docs.rs`, `crates.io`, `rust-lang.org`), enabling it to fetch accurate documentation, explain concepts, and fix errors in real-time.
+The `rustools-mcp` server connects your LLM (Trae, Cursor, Claude) directly to the Rust ecosystem (`docs.rs`, `crates.io`, `rust-lang.org`), enabling it to fetch accurate documentation, explain concepts, and fix errors in real-time.
 
 ## ✨ Key Features
 

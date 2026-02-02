@@ -1,6 +1,6 @@
-# Developer Documentation: `mcp_rustools`
+# Developer Documentation: `rustools-mcp`
 
-This document details the architecture, internal logic, and development workflows for the `mcp_rustools` (crate: `rustools-mcp`) project.
+This document details the architecture, internal logic, and development workflows for the `rustools-mcp` (crate: `rustools-mcp`) project.
 
 ## 1. System Architecture
 

@@ -15,3 +15,5 @@ Thumbs.db
 requests.log
 verification_cache/
 *.log
+*.html
+doc.md
