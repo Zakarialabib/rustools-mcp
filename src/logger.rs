@@ -1,30 +1,32 @@
+use chrono::Utc;
+use serde::Serialize;
+use std::sync::Arc;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 use tokio::sync::Mutex;
-use std::sync::Arc;
-use serde::Serialize;
-use chrono::Utc;
 
 #[derive(Clone)]
 pub struct RequestLogger {
-    file: Arc<Mutex<File>>,
+    file: Option<Arc<Mutex<File>>>,
 }
 
 impl RequestLogger {
     pub fn new(path: &str) -> Self {
         // We open synchronously at startup to ensure the file exists and we have permissions
         // Then we convert to tokio::fs::File for async writing
-        let std_file = std::fs::OpenOptions::new()
+        let file = match std::fs::OpenOptions::new()
             .create(true)
             .append(true)
             .open(path)
-            .expect("Failed to open log file");
-        
-        let file = File::from_std(std_file);
-        
-        Self {
-            file: Arc::new(Mutex::new(file)),
-        }
+        {
+            Ok(std_file) => Some(Arc::new(Mutex::new(File::from_std(std_file)))),
+            Err(e) => {
+                eprintln!("Failed to open log file '{}': {}", path, e);
+                None
+            }
+        };
+
+        Self { file }
     }
 
     pub async fn log<A: Serialize, R: Serialize>(&self, tool: &str, args: &A, result: &R) {
@@ -34,10 +36,12 @@ impl RequestLogger {
             args,
             result,
         };
-        
-        if let Ok(line) = serde_json::to_string(&entry) {
-            let mut file = self.file.lock().await;
-            let _ = file.write_all(format!("{}\n", line).as_bytes()).await;
+
+        if let Some(file_mutex) = &self.file {
+            if let Ok(line) = serde_json::to_string(&entry) {
+                let mut file = file_mutex.lock().await;
+                let _ = file.write_all(format!("{}\n", line).as_bytes()).await;
+            }
         }
     }
 }

@@ -1,5 +1,5 @@
 //! Rust Documentation MCP Service
-//! 
+//!
 //! This crate provides a Machine Control Protocol (MCP) service for fetching and caching
 //! Rust documentation from docs.rs. It allows clients to request documentation for any
 //! published Rust crate through a simple interface.
@@ -18,11 +18,15 @@
 //! - [`mcp`]: MCP server implementation and protocol handling
 
 pub mod cache;
-pub mod docs_parser;
-pub mod mcp;
-pub mod server;
-pub mod web_ui;
-pub mod logger;
-pub mod rust_book;
-pub mod error_index;
 pub mod cargo_tools;
+pub mod docs_parser;
+pub mod error_index;
+pub mod logger;
+pub mod mcp;
+pub mod rust_book;
+pub mod server;
+pub mod tools;
+pub mod web_ui;
+pub mod config;
+pub mod context_engine;
+pub mod prompts;

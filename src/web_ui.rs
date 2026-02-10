@@ -1,12 +1,12 @@
 use axum::{
+    extract::Path,
+    response::{Html, IntoResponse, Json},
     routing::get,
     Router,
-    response::{Html, IntoResponse, Json},
-    extract::Path,
 };
+use serde_json::{json, Value};
 use std::net::SocketAddr;
 use tokio::fs;
-use serde_json::{Value, json};
 use tower_http::cors::CorsLayer;
 
 pub async fn start_ui_server(port: u16) {
@@ -19,7 +19,7 @@ pub async fn start_ui_server(port: u16) {
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     println!("Dashboard running at http://localhost:{}", port);
-    
+
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
@@ -37,7 +37,7 @@ async fn get_logs() -> impl IntoResponse {
                 .filter_map(|line| serde_json::from_str(line).ok())
                 .collect();
             Json(lines).into_response()
-        },
+        }
         Err(_) => Json(Vec::<Value>::new()).into_response(),
     }
 }
@@ -62,15 +62,15 @@ async fn get_cache_item(Path(name): Path<String>) -> impl IntoResponse {
     if name.contains("..") || name.contains('/') || name.contains('\\') {
         return Json(json!({"error": "Invalid filename"})).into_response();
     }
-    
+
     match fs::read_to_string(path).await {
         Ok(content) => {
             if let Ok(json) = serde_json::from_str::<Value>(&content) {
                 Json(json).into_response()
             } else {
-                 Json(json!({"error": "Invalid JSON in cache file"})).into_response()
+                Json(json!({"error": "Invalid JSON in cache file"})).into_response()
             }
-        },
+        }
         Err(_) => Json(json!({"error": "File not found"})).into_response(),
     }
 }

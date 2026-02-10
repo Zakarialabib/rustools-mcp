@@ -5,14 +5,14 @@ use std::error::Error;
 async fn main() -> Result<(), Box<dyn Error>> {
     // Using direct HTTP for testing
     http_client().await?;
-    
+
     Ok(())
 }
 
 async fn http_client() -> Result<(), Box<dyn Error>> {
     // URL of the running MCP server
     let server_url = "http://127.0.0.1:8080";
-    
+
     // Example: Query docs.rs for tokio::time::sleep function
     let query_tokio = json!({
         "jsonrpc": "2.0",
@@ -24,10 +24,10 @@ async fn http_client() -> Result<(), Box<dyn Error>> {
             "path": "tokio/time/fn.sleep.html"
         }
     });
-    
+
     println!("Querying tokio::time::sleep...");
     let response = query_mcp(server_url, query_tokio).await?;
-    
+
     if let Some(error) = response.get("error") {
         println!("Error: {}", error);
     } else if let Some(result) = response.get("result") {
@@ -44,7 +44,7 @@ async fn http_client() -> Result<(), Box<dyn Error>> {
             println!("No content field found in response");
         }
     }
-    
+
     // Example: Query docs.rs for serde_json::to_string function
     let query_serde_json = json!({
         "jsonrpc": "2.0",
@@ -56,10 +56,10 @@ async fn http_client() -> Result<(), Box<dyn Error>> {
             "path": "serde_json/fn.to_string.html"
         }
     });
-    
+
     println!("\nQuerying serde_json::to_string...");
     let response = query_mcp(server_url, query_serde_json).await?;
-    
+
     if let Some(error) = response.get("error") {
         println!("Error: {}", error);
     } else if let Some(result) = response.get("result") {
@@ -76,18 +76,19 @@ async fn http_client() -> Result<(), Box<dyn Error>> {
             println!("No content field found in response");
         }
     }
-    
+
     Ok(())
 }
 
 async fn query_mcp(server_url: &str, query: Value) -> Result<Value, Box<dyn Error>> {
     let client = reqwest::Client::new();
-    let response = client.post(server_url)
+    let response = client
+        .post(server_url)
         .json(&query)
         .send()
         .await?
         .json::<Value>()
         .await?;
-    
+
     Ok(response)
-} 
+}

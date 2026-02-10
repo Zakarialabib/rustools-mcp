@@ -1,10 +1,10 @@
+use anyhow::{anyhow, Result};
 use reqwest::Client;
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use tokio::sync::Mutex;
-use anyhow::{Result, anyhow};
 use strsim::jaro_winkler;
+use tokio::sync::Mutex;
 
 const BOOK_URL: &str = "https://doc.rust-lang.org/book/";
 const TOC_URL: &str = "https://doc.rust-lang.org/book/toc.html";
@@ -39,13 +39,14 @@ impl RustBookClient {
 
         let response = self.client.get(TOC_URL).send().await?.text().await?;
         let document = Html::parse_document(&response);
-        let selector = Selector::parse(".chapter-item a").map_err(|e| anyhow!("Selector error: {:?}", e))?;
+        let selector =
+            Selector::parse(".chapter-item a").map_err(|e| anyhow!("Selector error: {:?}", e))?;
 
         for element in document.select(&selector) {
             if let Some(href) = element.value().attr("href") {
                 let text = element.text().collect::<Vec<_>>().join(" ");
                 let clean_text = text.trim().to_string();
-                
+
                 // Skip internal anchor links or empty links
                 if !href.starts_with("#") && !clean_text.is_empty() {
                     let full_url = if href.starts_with("http") {
@@ -74,14 +75,20 @@ impl RustBookClient {
     pub async fn search_concept(&self, query: &str) -> Result<Option<BookChapter>> {
         self.ensure_toc().await?;
         let chapters = self.chapters.lock().await;
-        
+
         // 1. Exact match (case insensitive)
-        if let Some(chapter) = chapters.iter().find(|c| c.title.to_lowercase() == query.to_lowercase()) {
+        if let Some(chapter) = chapters
+            .iter()
+            .find(|c| c.title.to_lowercase() == query.to_lowercase())
+        {
             return Ok(Some(chapter.clone()));
         }
 
         // 2. Contains match
-        if let Some(chapter) = chapters.iter().find(|c| c.title.to_lowercase().contains(&query.to_lowercase())) {
+        if let Some(chapter) = chapters
+            .iter()
+            .find(|c| c.title.to_lowercase().contains(&query.to_lowercase()))
+        {
             return Ok(Some(chapter.clone()));
         }
 
@@ -97,7 +104,8 @@ impl RustBookClient {
             }
         }
 
-        if best_score > 0.8 { // Threshold for fuzzy match
+        if best_score > 0.8 {
+            // Threshold for fuzzy match
             return Ok(best_match.cloned());
         }
 
@@ -108,7 +116,8 @@ impl RustBookClient {
     pub async fn get_chapter_content(&self, url: &str) -> Result<String> {
         let response = self.client.get(url).send().await?.text().await?;
         let document = Html::parse_document(&response);
-        let main_selector = Selector::parse("main").map_err(|e| anyhow!("Selector error: {:?}", e))?;
+        let main_selector =
+            Selector::parse("main").map_err(|e| anyhow!("Selector error: {:?}", e))?;
 
         if let Some(main) = document.select(&main_selector).next() {
             // Convert to Markdown using html2md for better LLM readability
@@ -118,5 +127,11 @@ impl RustBookClient {
         } else {
             Err(anyhow!("Could not find <main> content in chapter page"))
         }
+    }
+}
+
+impl Default for RustBookClient {
+    fn default() -> Self {
+        Self::new()
     }
 }
